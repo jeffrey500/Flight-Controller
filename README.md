@@ -12,7 +12,7 @@ This board is apart of my interest to building the entire hardware and software 
 
 ## Features
 
-|                           | Capability                            |
+| Feature                   | Capability                            |
 |---------------------------|---------------------------------------|
 | Processor                 | STM32H743VIT6                         |
 | Clock Speed               | 480MHz                                |
@@ -29,6 +29,7 @@ This board is apart of my interest to building the entire hardware and software 
 | Power                     | 5-35V                                 |
 | Debugging                 | Serial Debug                          |
 | Serial                    | USB-C                                 |
+| Logging                   | Micro-SD Card                         |
 
 ### Connectors
 The external connectors for UART, SPI, CAN, and DAC are JST-GH for secure latching connections.  
@@ -61,7 +62,7 @@ Standard copper pour is used for signal layers as well as thorough ground stitch
 ### Internal Ground Plane 2 and 3 respectively   
 <img src="media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer3_pour.png" width="49.4%" alt="Layer4_pour">
 
-## Routing Considerations
+## Routing
 
 ### Power
 Power is routed through the board using thick PCB traces and many vias. The Board uses a LMR16020 step down simple switcher to get 5V, used to power external peripherals such as radio and GPS.   
@@ -69,10 +70,18 @@ The TPS7A2033PDBVR low dropout regulator is used to further reduce the voltage t
 Such power components were placed in the top right corner to try and isolate the noise they would generate.
 
 ### Ground Vias
-Anytime a signal traveled between layers, a corresponding ground reference via was placed nearby to provide a reference.
+Anytime a signal traveled between layers, a corresponding ground reference via was placed.
 
-### High Speed Routing
+### Signals
+Faster or more critical signals were routed first such that they had minimal trace length and travel between layers.   
+USB was routed with a differential pair.
 
+Routing Priority: USB, SDMMC, SPI, DAC, CAN, UART, I2C, PWM, GPIO.  
+
+Impedance matching was not done for SDMMC due to a lower speed requirement but length matching (>10mm) was taken into account. 
+
+## Mechanical
+Dimensions 41 mm* 55.9 mm. 1.6mm Board thickness. Four M3 mounting holes on the corners of the board. 
 
 ## Ardupilot
 
@@ -82,7 +91,7 @@ See the attached [Binary Bootloader File](/Ardupilot%20Firmware/AP_Bootloader.bi
 See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwdef.dat) and [hwdef-bl.dat](/Ardupilot%20Firmware/hwdef-bl.dat) that can be built using the [Ardupilot Repository](https://github.com/Ardupilot/ardupilot).
 
 ## Next Iteration
-- Main Capacitor Needs higher voltage rating so it can accommodate 6s lipo battery
+- Input Capacitor Needs higher voltage rating so it can accommodate 6s lipo battery
 - Connect both 5.1k usb resistors
 - Re-align the SD-card properly
 - 2 pin JST connector for main power
@@ -99,3 +108,5 @@ See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwd
 [Flight-Controller V1.0](https://github.com/jeffrey500/Flight-Controller) © 2026 by [Jeffrey Zhu](https://jzhu.ca) is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 [![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
+//ADD BOM, Picture of the Board at the top
