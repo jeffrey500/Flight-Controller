@@ -1,14 +1,14 @@
 # Flight-Controller V1.0
-
+<img src="media/Board_front.png" width="49%" alt="CUBEMX"> <img src="media/Board_back.png" width="49%" alt="CUBEMX">
 The purpose of this project was to gain experience working on a 4-layer PCB layout with Altium and working with the ARM STM32 family of microcontrollers.  
-Communication protocols such as SPI, UART, I2C, CAN, and USB will be explored.  
+Communication protocols such as SPI, UART, I2C, CAN, and USB were explored.  
 Going forward, this board will serve as a testbed for the testing of control algorithms and can interface with an external flight computer such   
 as a jetson nano for tasks such as computer vision and advanced autonomous flight. 
 
 This board will also be designed to optionally run the [Ardupilot](https://ardupilot.org/) firmware for autonomous flight and initial testing.  
 This board can also support the DJI Air unit system through the VTX connector.
 
-This board is apart of my interest to building the entire hardware and software stack for a drone (Project Drone Full Stack PDFS).
+This board is a part of my interest to building the entire hardware and software stack for a drone (Project Drone Full Stack PDFS).
 
 ## Features
 
@@ -26,7 +26,7 @@ This board is apart of my interest to building the entire hardware and software 
 | Camera Feed               | Digital                               |
 | I2C                       | Row 2, Cell 2                         |
 | DAC                       | 1                                     |
-| Power                     | 5-35V                                 |
+| Power                     | 7-35V                                 |
 | Debugging                 | Serial Debug                          |
 | Serial                    | USB-C                                 |
 | Logging                   | Micro-SD Card                         |
@@ -38,6 +38,7 @@ An O3 or O4 DJI Air Unit can connect through the 6-pin JST-SH VTX connector.
 
 ## CubeMX
 The [STM32CubeMX Software](https://www.st.com/en/development-tools/stm32cubemx.html) was used to determine the power and pinout for the STM32H743VIT6.  
+See the [CubeMX .ioc file](/FC.ioc)
 
 <img src="media/CUBEMX.png" width="80%" alt="CUBEMX">
 
@@ -46,7 +47,6 @@ The [STM32CubeMX Software](https://www.st.com/en/development-tools/stm32cubemx.h
 
 ## Board Stackup
 Signal Ground Ground Signal (S-G-G-S) was chosen over Signal Ground Power Signal (S-G-P-S) as both signal layers are shielded from each other by a close ground plane.  
-There is also better ground reference vias for signals traveling between the outermost layers.  
 Standard copper pour is used for signal layers as well as thorough ground stitching.
 
 | Layer | Purpose |
@@ -66,7 +66,7 @@ Standard copper pour is used for signal layers as well as thorough ground stitch
 
 ### Power
 Power is routed through the board using thick PCB traces and many vias. The Board uses a LMR16020 step down simple switcher to get 5V, used to power external peripherals such as radio and GPS.   
-The TPS7A2033PDBVR low dropout regulator is used to further reduce the voltage to 3.3V for the STM32H743 and onboard peripherals.  
+The TPS7A2033PDBVR low dropout regulator is used to further reduce the voltage from 5V to 3.3V for the STM32H743 and onboard peripherals.  
 Such power components were placed in the top right corner to try and isolate the noise they would generate.
 
 ### Ground Vias
@@ -103,10 +103,9 @@ See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwd
   - Serial Debug
 - Less long-parallel wiring which could resulted in the coupling of signals
   - Better initial planning of component layout
+- The LMR16020 better layout, rms rated caps and inductor. Currently, causing high thermal output.
 
 ## License
 [Flight-Controller V1.0](https://github.com/jeffrey500/Flight-Controller) © 2026 by [Jeffrey Zhu](https://jzhu.ca) is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 [![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
-//ADD BOM, Picture of the Board at the top
