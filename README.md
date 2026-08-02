@@ -105,6 +105,14 @@ See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwd
   - Better initial planning of component layout
 - The LMR16020 better layout, rms rated caps and inductor. Currently, causing high thermal output.
 
+## Ardupilot Build
+```bash
+cd ardupilot/
+./waf clean
+./waf configure --board MyCustomFC
+./waf copter
+```
+
 ## License
 [Flight-Controller V1.0](https://github.com/jeffrey500/Flight-Controller) © 2026 by [Jeffrey Zhu](https://jzhu.ca) is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
