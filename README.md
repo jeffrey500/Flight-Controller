@@ -1,4 +1,4 @@
-# Flight-Controller V1.0
+# Flight-Controller V1.1
 
 The purpose of this project was to gain experience working on a 4-layer PCB layout with Altium and working with the ARM STM32 family of microcontrollers.  
 Communication protocols such as SPI, UART, I2C, CAN, and USB will be explored.  
@@ -9,6 +9,15 @@ This board will also be designed to optionally run the [Ardupilot](https://ardup
 This board can also support the DJI Air unit system through the VTX connector.
 
 This board is apart of my interest to building the entire hardware and software stack for a drone (Project Drone Full Stack PDFS).
+
+## Improvements from V1.0
+1. Inductor with higher saturation and max current chosen for Buck Converter
+2. Swapped TPS7A2033PDBVR for the TPS74533PQWDRVRQ which has higher max current supply
+3. Buzzer moved from PE8 to PA4 (Pin with PWM timer)
+4. SD-Card correctly realigned
+5. Both 5.1k CC resistors for USB-C attached to ground
+6. Removed DFU LED
+
 
 ## Features
 
@@ -57,16 +66,16 @@ Standard copper pour is used for signal layers as well as thorough ground stitch
 | 4     | Signal  |
 
 ### Top and Bottom signal layers respectively with copper pours
-<img src="media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer4_pour.png" width="49%" alt="Layer4_pour">
+<img src="media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer4_pour.png" width="47.3%" alt="Layer4_pour">
 
 ### Internal Ground Plane 2 and 3 respectively   
-<img src="media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer3_pour.png" width="49.4%" alt="Layer4_pour">
+<img src="media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer3_pour.png" width="47.4%" alt="Layer4_pour">
 
 ## Routing
 
 ### Power
 Power is routed through the board using thick PCB traces and many vias. The Board uses a LMR16020 step down simple switcher to get 5V, used to power external peripherals such as radio and GPS.   
-The TPS7A2033PDBVR low dropout regulator is used to further reduce the voltage to 3.3V for the STM32H743 and onboard peripherals.  
+The TPS74533PQWDRVRQ low dropout regulator is used to further reduce the voltage to 3.3V for the STM32H743 and onboard peripherals.  
 Such power components were placed in the top right corner to try and isolate the noise they would generate.
 
 ### Ground Vias
@@ -91,16 +100,7 @@ See the attached [Binary Bootloader File](/Ardupilot%20Firmware/AP_Bootloader.bi
 See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwdef.dat) and [hwdef-bl.dat](/Ardupilot%20Firmware/hwdef-bl.dat) that can be built using the [Ardupilot Repository](https://github.com/Ardupilot/ardupilot).
 
 ## Next Iteration
-- Input Capacitor Needs higher voltage rating so it can accommodate 6s lipo battery
-- Connect both 5.1k usb resistors
-- Re-align the SD-card properly
-- 2 pin JST connector for main power
-- Buzzer on a proper PWM channel or active buzzer
-- Reorder the Motor driver pins
-- Better Silkscreen
-  - PWM pins
-  - Align text to be readable horizontally or on the right Purpose of connectors
-  - Serial Debug
+
 - Less long-parallel wiring which could resulted in the coupling of signals
   - Better initial planning of component layout
 
