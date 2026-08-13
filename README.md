@@ -1,14 +1,16 @@
 # Flight-Controller V1.1
 
 The purpose of this project was to gain experience working on a 4-layer PCB layout with Altium and working with the ARM STM32 family of microcontrollers.  
-Communication protocols such as SPI, UART, I2C, CAN, and USB will be explored.  
+Communication protocols such as SPI, UART, I2C, CAN, and USB were explored.  
 Going forward, this board will serve as a testbed for the testing of control algorithms and can interface with an external flight computer such   
 as a jetson nano for tasks such as computer vision and advanced autonomous flight. 
 
 This board will also be designed to optionally run the [Ardupilot](https://ardupilot.org/) firmware for autonomous flight and initial testing.  
 This board can also support the DJI Air unit system through the VTX connector.
 
-This board is apart of my interest to building the entire hardware and software stack for a drone (Project Drone Full Stack PDFS).
+This board is a part of my interest to building the entire hardware and software stack for a drone (Project Drone Full Stack PDFS).
+
+<img src="media/Board_front.png" width="49%" alt="CUBEMX"> <img src="media/Board_back.png" width="44.7%" alt="CUBEMX">
 
 ## Improvements from V1.0
 1. Inductor with higher saturation and max current chosen for Buck Converter
@@ -98,6 +100,14 @@ The Ardupilot bootloader and firmware can be flashed by using an ST-LINK and Ser
 
 See the attached [Binary Bootloader File](/Ardupilot%20Firmware/AP_Bootloader.bin) and [Binary Firmware File](/Ardupilot%20Firmware/AP_Bootloader.bin).  
 See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwdef.dat) and [hwdef-bl.dat](/Ardupilot%20Firmware/hwdef-bl.dat) that can be built using the [Ardupilot Repository](https://github.com/Ardupilot/ardupilot).
+
+## Ardupilot Build
+```bash
+cd ardupilot/
+./waf clean
+./waf configure --board MyCustomFC
+./waf copter
+```
 
 ## Next Iteration
 
