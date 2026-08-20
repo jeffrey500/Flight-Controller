@@ -101,14 +101,6 @@ The Ardupilot bootloader and firmware can be flashed by using an ST-LINK and Ser
 See the attached [Binary Bootloader File](/Ardupilot%20Firmware/AP_Bootloader.bin) and [Binary Firmware File](/Ardupilot%20Firmware/AP_Bootloader.bin).  
 See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwdef.dat) and [hwdef-bl.dat](/Ardupilot%20Firmware/hwdef-bl.dat) that can be built using the [Ardupilot Repository](https://github.com/Ardupilot/ardupilot).
 
-## Ardupilot Build
-```bash
-cd ardupilot/
-./waf clean
-./waf configure --board MyCustomFC
-./waf copter
-```
-
 ## Next Iteration
 
 - Less long-parallel wiring which could resulted in the coupling of signals
@@ -118,5 +110,3 @@ cd ardupilot/
 [Flight-Controller V1.0](https://github.com/jeffrey500/Flight-Controller) © 2026 by [Jeffrey Zhu](https://jzhu.ca) is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 [![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
-//ADD BOM, Picture of the Board at the top
