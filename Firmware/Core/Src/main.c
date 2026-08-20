@@ -18,11 +18,17 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32h7xx_hal_dma.h"
 #include "stm32h7xx_hal_gpio.h"
+#include "stm32h7xx_hal_uart.h"
 #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "imu.h"
+#include "radio.h"
+#include <stdint.h>
+#include <sys/types.h>
 
 /* USER CODE END Includes */
 
@@ -75,7 +81,18 @@ UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN PV */
 
+// 1kHz loop variables
 volatile uint8_t loop_ready = 0;
+int counter = 0;
+
+// DMA buffer for Radio
+#define RADIO_BUFFER_SIZE 128
+uint8_t rx_buffer[RADIO_BUFFER_SIZE] = {0};
+uint16_t rx_tail = 0;
+
+// Current Proccess Data
+RC_Channels current_channel_data;
+IMU_data current_imu_data;
 
 /* USER CODE END PV */
 
@@ -173,13 +190,20 @@ int main(void)
 
   HAL_TIM_Base_Start_IT(&htim6);
 
+  // Ensure IMU start proper, else ERROR light and lock
+  if(IMU_Init() == false){
+    HAL_GPIO_WritePin(ERROR_GPIO_Port, ERROR_Pin, GPIO_PIN_SET);
+    while (1) {}
+  }
+
+  // Start Radio circular DMA
+  HAL_UART_Receive_DMA(&huart2, rx_buffer, RADIO_BUFFER_SIZE);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-
-  int counter = 0;
-
   while (1)
   {
     /* USER CODE END WHILE */
@@ -187,12 +211,45 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
     if (loop_ready){
+
       loop_ready = 0;
+      counter++;
+
+      // Pulse hearbeat at 0.5Hz
       if (counter >= 1000){
         counter = 0;
         HAL_GPIO_TogglePin(HEARTBEAT_GPIO_Port, HEARTBEAT_Pin);
       }
+
+      // Radio
+      // Find where the DMA is writing to currenty
+      uint16_t rx_head = RADIO_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(huart2.hdmarx);
+
+      // Process the bits where the head has moved infront of the tail
+      while (rx_tail != rx_head){
+        Radio_ProcessByte(rx_buffer[rx_tail]);
+
+        rx_tail++;
+
+        // Wrap around the circular array if the tail is past the end
+        if (rx_tail >= RADIO_BUFFER_SIZE){
+          rx_tail = 0;
+        }
+      }
+
+      // Check if there is new complete channel data
+      Radio_GetChannels(&current_channel_data);
+
+      // Add Radio failsafe here later
+
+
+      // Get IMU Data
+      IMU_Read(&current_imu_data);
+
+      // PID loop
+
     }
+
   }
   /* USER CODE END 3 */
 }
