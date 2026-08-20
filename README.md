@@ -10,7 +10,7 @@ This board can also support the DJI Air unit system through the VTX connector.
 
 This board is a part of my interest to building the entire hardware and software stack for a drone (Project Drone Full Stack PDFS).
 
-<img src="media/Board_front.png" width="49%" alt="CUBEMX"> <img src="media/Board_back.png" width="44.7%" alt="CUBEMX">
+<img src="Media/Board_front.png" width="49%" alt="CUBEMX"> <img src="Media/Board_back.png" width="44.7%" alt="CUBEMX">
 
 ## Improvements from V1.0
 1. Inductor with higher saturation and max current chosen for Buck Converter
@@ -50,10 +50,10 @@ An O3 or O4 DJI Air Unit can connect through the 6-pin JST-SH VTX connector.
 ## CubeMX
 The [STM32CubeMX Software](https://www.st.com/en/development-tools/stm32cubemx.html) was used to determine the power and pinout for the STM32H743VIT6.  
 
-<img src="media/CUBEMX.png" width="80%" alt="CUBEMX">
+<img src="Media/CUBEMX.png" width="80%" alt="CUBEMX">
 
 ## Schematic
-<img src="media/Schematic.png" width="100%" alt="Schematic">
+<img src="Media/Schematic.png" width="100%" alt="Schematic">
 
 ## Board Stackup
 Signal Ground Ground Signal (S-G-G-S) was chosen over Signal Ground Power Signal (S-G-P-S) as both signal layers are shielded from each other by a close ground plane.  
@@ -68,10 +68,10 @@ Standard copper pour is used for signal layers as well as thorough ground stitch
 | 4     | Signal  |
 
 ### Top and Bottom signal layers respectively with copper pours
-<img src="media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer4_pour.png" width="47.3%" alt="Layer4_pour">
+<img src="Media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer4_pour.png" width="47.3%" alt="Layer4_pour">
 
 ### Internal Ground Plane 2 and 3 respectively   
-<img src="media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer3_pour.png" width="47.4%" alt="Layer4_pour">
+<img src="Media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer3_pour.png" width="47.4%" alt="Layer4_pour">
 
 ## Routing
 
