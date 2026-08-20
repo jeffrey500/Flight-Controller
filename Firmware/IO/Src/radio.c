@@ -1,7 +1,7 @@
 // The intention is to use a radio that supports CRSF https://github.com/tbs-fpv/tbs-crsf-spec/blob/main/crsf.md
 // CRSF packets are as follows => 0: address 1: length of data left in the packet/payload (N) 2: type of data 3-N: data N+1: CRC 
 // CRSF payload are at most 64 bytes (including CRC)
-
+// CRSF Channel values range from 172 to 1811
 
 #include "radio.h"
 #include <stdbool.h>
