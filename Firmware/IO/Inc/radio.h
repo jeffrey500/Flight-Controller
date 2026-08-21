@@ -9,7 +9,6 @@ typedef struct {
     uint16_t throttle;
 } RC_Channels;
 
-void Radio_Init(void);
 void Radio_ProcessByte(uint8_t data);
 bool Radio_GetChannels(RC_Channels *data);
 

@@ -18,17 +18,17 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stm32h7xx_hal_dma.h"
-#include "stm32h7xx_hal_gpio.h"
-#include "stm32h7xx_hal_uart.h"
 #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "imu.h"
-#include "radio.h"
 #include <stdint.h>
 #include <sys/types.h>
+#include "imu.h"
+#include "radio.h"
+#include "mixer.h"
+#include "pid.h"
+#include "dshot.h"
 
 /* USER CODE END Includes */
 
@@ -93,6 +93,11 @@ uint16_t rx_tail = 0;
 // Current Proccess Data
 RC_Channels current_channel_data;
 IMU_data current_imu_data;
+
+// PID variables
+PID_Controller pid_roll;
+PID_Controller pid_pitch;
+PID_Controller pid_yaw;
 
 /* USER CODE END PV */
 
@@ -188,7 +193,11 @@ int main(void)
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
 
+  // 1kHz loop timer
   HAL_TIM_Base_Start_IT(&htim6);
+
+  // Start Tim2 for dshot
+  HAL_TIM_Base_Start(&htim2);
 
   // Ensure IMU start proper, else ERROR light and lock
   if(IMU_Init() == false){
@@ -196,9 +205,13 @@ int main(void)
     while (1) {}
   }
 
+  // Initalize PID for roll, pitch, yaw
+  PID_Init(&pid_roll, 0.001f, 40.0f, 70.0f, 30.0f, 500.0f, 700.0f);
+  PID_Init(&pid_pitch, 0.001f, 40.0f, 70.0f, 30.0f, 500.0f, 700.0f);
+  PID_Init(&pid_yaw, 0.001f, 40.0f, 70.0f, 30.0f, 500.0f, 700.0f);
+
   // Start Radio circular DMA
   HAL_UART_Receive_DMA(&huart2, rx_buffer, RADIO_BUFFER_SIZE);
-
 
   /* USER CODE END 2 */
 
@@ -247,6 +260,15 @@ int main(void)
       IMU_Read(&current_imu_data);
 
       // PID loop
+      float pid_output_roll = PID_Generate(&pid_roll, current_channel_data.roll, current_imu_data.gyro_x);
+      float pid_output_pitch = PID_Generate(&pid_pitch, current_channel_data.pitch, current_imu_data.gyro_y);
+      float pid_output_yaw = PID_Generate(&pid_yaw, current_channel_data.yaw, current_imu_data.gyro_z);
+
+      // Update motor outputs via mixer
+      Mixer(current_channel_data.throttle, pid_output_roll, pid_output_pitch, pid_output_yaw, 100);
+
+      // Send motor outputs via dshot
+      DSHOT_Update();
 
     }
 
@@ -655,7 +677,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_32;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -797,7 +819,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 0;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 1000;
+  htim2.Init.Period = 799;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
@@ -965,9 +987,9 @@ static void MX_TIM6_Init(void)
 
   /* USER CODE END TIM6_Init 1 */
   htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 0;
+  htim6.Init.Prescaler = 239;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 65535;
+  htim6.Init.Period = 999;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -1097,7 +1119,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
+  huart1.Init.BaudRate = 420000;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
