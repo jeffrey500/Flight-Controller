@@ -1,7 +1,7 @@
-#ifndef IMU_H
-#define IMU_H
+#ifndef BMI270_FIRMWARE_H
+#define BMI270_FIRMWARE_H
 
-#include 
+#include <stdint.h>
 
 // https://github.com/boschsensortec/BMI270_SensorAPI/blob/master/bmi270.c
 const uint8_t bmi270_config_file[] = {

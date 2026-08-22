@@ -45,11 +45,34 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
+    Sensors/Src/imu.c
+    Sensors/Inc/imu.h
+    Flight/Src/mixer.c
+    Flight/Src/pid.c
+    Flight/Inc/mixer.h
+    Flight/Inc/pid.h
+    IO/Inc/dshot.h
+    IO/Inc/radio.h
+    IO/Src/dshot.c
+    IO/Src/radio.c
+    Sensors/Inc/bmi270_firmware.h
+    Sensors/Inc/imu.h
+    Sensors/Src/imu.c
+    Flight/Inc/attitude.h
+    Flight/Inc/attitude.h
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
+    Core/Inc
+    Core/Src
+    Sensors/Inc
+    Sensors/Src
+    Flight/Inc
+    Flight/Src
+    IO/Inc
+    IO/Src
 )
 
 # Add project symbols (macros)

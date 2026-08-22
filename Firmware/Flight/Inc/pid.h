@@ -6,13 +6,17 @@ typedef struct{
     float DT;
 
     // Tuning Constants
-    float Kp;
+    float Kk;
     float Ki;
     float Kd;
 
     // Previous state memories
     float integral;
-    float prev_error;
+    float prev_actual;
+    float prev_filtered_d;
+
+    // LFP filter values
+    float lpf_alpha;
 
     // Max values
     float max_integral;
@@ -20,7 +24,7 @@ typedef struct{
 
 } PID_Controller;
 
-void PID_Init(PID_Controller *pid, float dt, float p, float i, float d, float m_integral, float m_output);
+void PID_Init(PID_Controller *pid, float dt, float alpha, float k, float i, float d, float m_integral, float m_output);
 float PID_Generate(PID_Controller *pid, float setpoint, float acutal);
 
 #endif

@@ -2,6 +2,8 @@
 #define RADIO_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
 typedef struct {
     uint16_t roll;
     uint16_t pitch;

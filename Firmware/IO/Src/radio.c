@@ -6,6 +6,7 @@
 #include "radio.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 // CRSF lookup table
 static const uint8_t crc8tab[256] = {
