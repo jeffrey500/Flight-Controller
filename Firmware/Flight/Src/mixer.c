@@ -15,6 +15,14 @@ static uint16_t verify_dshot(float value){
     return (uint16_t)value;
 }
 
+float channel_to_angle(uint16_t throttle, float max_angle){
+    return (float)(throttle - 992.0f) * (max_angle / (820.0f));
+}
+
+float channel_to_angular_rate(uint16_t throttle, float max_rate){
+    return (float)(throttle - 992.0f) * (max_rate / (820.0f));
+}
+
 void Mixer(uint16_t throttle, float roll_pid, float pitch_pid, float yaw_pid, uint8_t percent_power){
     // Turn off motor if throttle close to zero
     if (throttle < 250){
@@ -25,7 +33,7 @@ void Mixer(uint16_t throttle, float roll_pid, float pitch_pid, float yaw_pid, ui
     }
 
     // Map throttle (channel data) to dshot
-    float dshot_throttle = (float)(throttle - 172.0) * 1.22f * (float)percent_power * 0.01f + 48.0f;
+    float dshot_throttle = (float)(throttle - 172.0f) * 1.22f * (float)percent_power * 0.01f + 48.0f;
     
     // Mix the output to each motor
     float mA = dshot_throttle - roll_pid - pitch_pid + yaw_pid;

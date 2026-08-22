@@ -29,6 +29,7 @@
 #include "mixer.h"
 #include "pid.h"
 #include "dshot.h"
+#include "attitude.h"
 
 /* USER CODE END Includes */
 
@@ -90,14 +91,23 @@ int counter = 0;
 uint8_t rx_buffer[RADIO_BUFFER_SIZE] = {0};
 uint16_t rx_tail = 0;
 
-// Current Proccess Data
+// Data
 RC_Channels current_channel_data;
 IMU_data current_imu_data;
+Attitude_data current_attitude_data;
 
-// PID variables
+// Control loop variables
+PID_Controller angle_pid_roll;
+PID_Controller angle_pid_pitch;
 PID_Controller pid_roll;
 PID_Controller pid_pitch;
 PID_Controller pid_yaw;
+
+float angle_pid_output_roll;
+float angle_pid_output_pitch;
+float angular_pid_output_roll;
+float angular_pid_output_pitch;
+float angular_pid_output_yaw;
 
 /* USER CODE END PV */
 
@@ -205,10 +215,14 @@ int main(void)
     while (1) {}
   }
 
-  // Initalize PID for roll, pitch, yaw
-  PID_Init(&pid_roll, 0.001f, 40.0f, 70.0f, 30.0f, 500.0f, 700.0f);
-  PID_Init(&pid_pitch, 0.001f, 40.0f, 70.0f, 30.0f, 500.0f, 700.0f);
-  PID_Init(&pid_yaw, 0.001f, 40.0f, 70.0f, 30.0f, 500.0f, 700.0f);
+  // Initalize PID for Angle Control
+  PID_Init(&angle_pid_roll, 0.004f, 0, 4.0f, 0, 0, 0, 200.0f);
+  PID_Init(&angle_pid_pitch, 0.004f, 0, 4.0f, 0, 0, 0, 200.0f);
+
+  // Initalize PID for Angular Rate Control
+  PID_Init(&pid_roll, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
+  PID_Init(&pid_pitch, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
+  PID_Init(&pid_yaw, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
 
   // Start Radio circular DMA
   HAL_UART_Receive_DMA(&huart2, rx_buffer, RADIO_BUFFER_SIZE);
@@ -255,17 +269,26 @@ int main(void)
 
       // Add Radio failsafe here later
 
+      // 250 Hz loop for angle control
+      if ((counter-1)%4 == 0){
+        // Get IMU Data
+        IMU_Read(&current_imu_data);
 
-      // Get IMU Data
-      IMU_Read(&current_imu_data);
+        // Calculate attitude data
+        Update_Attitude(0.98f, 0.004, &current_imu_data, &current_attitude_data);
 
-      // PID loop
-      float pid_output_roll = PID_Generate(&pid_roll, current_channel_data.roll, current_imu_data.gyro_x);
-      float pid_output_pitch = PID_Generate(&pid_pitch, current_channel_data.pitch, current_imu_data.gyro_y);
-      float pid_output_yaw = PID_Generate(&pid_yaw, current_channel_data.yaw, current_imu_data.gyro_z);
+        // Attitude Angle Control 
+        angle_pid_output_roll = PID_Generate(&angle_pid_roll, channel_to_angle(current_channel_data.roll, 20), current_attitude_data.roll);
+        angle_pid_output_pitch = PID_Generate(&angle_pid_pitch, channel_to_angle(current_channel_data.pitch, 20), current_attitude_data.pitch);
+      }
+
+      // Roll Pitch Yaw Angular Rate Control
+      angular_pid_output_roll = PID_Generate(&pid_roll, angle_pid_output_roll, current_imu_data.gyro_x);
+      angular_pid_output_pitch = PID_Generate(&pid_pitch, angle_pid_output_pitch, current_imu_data.gyro_y);
+      angular_pid_output_yaw = PID_Generate(&pid_yaw, channel_to_angular_rate(current_channel_data.yaw, 90.0f), current_imu_data.gyro_z);
 
       // Update motor outputs via mixer
-      Mixer(current_channel_data.throttle, pid_output_roll, pid_output_pitch, pid_output_yaw, 100);
+      Mixer(current_channel_data.throttle, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
 
       // Send motor outputs via dshot
       DSHOT_Update();

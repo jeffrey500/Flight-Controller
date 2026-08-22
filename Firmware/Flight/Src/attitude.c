@@ -4,11 +4,13 @@
 
 #define RAD_TO_DEG 57.29577951f
 
+// Create empty Attitude_data struct (all 0)
 void Attitude_Init(Attitude_data *attitude){
     attitude->roll = 0;
     attitude->pitch = 0;
 }
 
+// Update Attitude_data struct with imu data and complementary filter
 void Update_Attitude(float alpha, float DT, IMU_data *imu, Attitude_data *attitude){
     float roll_accel =  atan2f(imu->accel_y, imu->accel_z) * RAD_TO_DEG;
     // Pitch requires the hypotenuse of Y and Z to decouple the axes
