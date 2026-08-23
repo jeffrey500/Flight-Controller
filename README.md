@@ -1,6 +1,5 @@
-# [Firmware](Firmware/README.md)
-
-# [Arducopter](Arducopter/README.md)
+# [Firmware -> Flight-Controller V1.2](Firmware/README.md)
+# [Arducopter -> Flight-Controller V1.2](Arducopter/README.md)
 
 # Hardware -> Flight-Controller V1.1
 
