@@ -1,9 +1,12 @@
-# Flight-Controller V1.1
+# [Firmware](Firmware/README.md)
+
+# [Arducopter](Arducopter/README.md)
+
+# Hardware -> Flight-Controller V1.1
 
 The purpose of this project was to gain experience working on a 4-layer PCB layout with Altium and working with the ARM STM32 family of microcontrollers.  
 Communication protocols such as SPI, UART, I2C, CAN, and USB were explored.  
-Going forward, this board will serve as a testbed for the testing of control algorithms and can interface with an external flight computer such   
-as a jetson nano for tasks such as computer vision and advanced autonomous flight. 
+Going forward, this board will serve as a testbed for the testing of control algorithms and can interface with an external flight computer such as a jetson nano for tasks such as computer vision and advanced autonomous flight. 
 
 This board will also be designed to optionally run the [Ardupilot](https://ardupilot.org/) firmware for autonomous flight and initial testing.  
 This board can also support the DJI Air unit system through the VTX connector.
