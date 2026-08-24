@@ -1,23 +1,28 @@
-# Flight-Controller V1.2
+# [Firmware -> Flight-Controller V1.2](Firmware/README.md)
+# [Arducopter -> Flight-Controller V1.2](Arducopter/README.md)
 
-The purpose of this project was to gain experience working on a 4-layer PCB layout with Altium and working with the ARM STM32 family of microcontrollers.  
-Communication protocols such as SPI, UART, I2C, CAN, and USB were explored.  
-Going forward, this board will serve as a testbed for the testing of control algorithms and can interface with an external flight computer such   
-as a jetson nano for tasks such as computer vision and advanced autonomous flight. 
+# Hardware -> Flight-Controller V1.2
+
+The purpose of this project was to gain experience working on a 4-layer PCB layout with Altium and working with the ARM STM32 family of microcontrollers. Communication protocols such as SPI, UART, I2C, CAN, and USB were explored.  
+Going forward, this board will serve as a testbed for the testing of control algorithms and can interface with an external flight computer such as a jetson nano for tasks such as computer vision and advanced autonomous flight. 
 
 This board will also be designed to optionally run the [Ardupilot](https://ardupilot.org/) firmware for autonomous flight and initial testing.  
 This board can also support the DJI Air unit system through the VTX connector.
 
 This board is a part of my interest to building the entire hardware and software stack for a drone (Project Drone Full Stack PDFS).
 
-<img src="media/Board_front.png" width="49%" alt="CUBEMX"> <img src="media/Board_back.png" width="44.7%" alt="CUBEMX">
-
 ## Improvements from V1.1
-1. Complete routing optimization to decrease trace lengths
-2. Reduction of parallel traces to reduce crosstalk
-3. Reduction of PCB footprint
-4. Modified silkscreen for LEDs
-5. Added directionality silkscreen indicator for accelerometer
+1. Complete re-routing of all signal traces for better signal integrity
+2. Reduction of total board size
+3. Improved silkscreen descriptors of ports and features
+
+## Improvements from V1.0
+1. Inductor with higher saturation and max current chosen for Buck Converter
+2. Swapped TPS7A2033PDBVR for the TPS74533PQWDRVRQ which has higher max current supply
+3. Buzzer moved from PE8 to PA4 (Pin with PWM timer)
+4. SD-Card correctly realigned
+5. Both 5.1k CC resistors for USB-C attached to ground
+6. Removed DFU LED
 
 ## Features
 
@@ -66,16 +71,16 @@ Standard copper pour is used for signal layers as well as thorough ground stitch
 | 4     | Signal  |
 
 ### Top and Bottom signal layers respectively with copper pours
-<img src="media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer4_pour.png" width="47.3%" alt="Layer4_pour">
+<img src="media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer4_pour.png" width="46.5%" alt="Layer4_pour">
 
 ### Internal Ground Plane 2 and 3 respectively   
-<img src="media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer3_pour.png" width="47.4%" alt="Layer4_pour">
+<img src="media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="media/Layer3_pour.png" width="46.3%" alt="Layer4_pour">
 
 ## Routing
 
 ### Power
-Power is routed through the board using thick PCB traces and many vias. The Board uses a LMR16020 step down simple switcher to get 5V, used to power external peripherals such as radio and GPS.   
-The TPS74533PQWDRVRQ low dropout regulator is used to further reduce the voltage to 3.3V for the STM32H743 and onboard peripherals.  
+Power is routed through the board using thick PCB traces and many vias. The Board uses a LMR16020 step down simple switcher to get 5V, used to power external peripherals such as radio and GPS.
+The TPS74533PQWDRVRQ low dropout regulator is used to further reduce the voltage to 3.3V for the STM32H743 and onboard peripherals.
 Such power components were placed in the top right corner to try and isolate the noise they would generate.
 
 ### Ground Vias
@@ -90,26 +95,9 @@ Routing Priority: USB, SDMMC, SPI, DAC, CAN, UART, I2C, PWM, GPIO.
 Impedance matching was not done for SDMMC due to a lower speed requirement but length matching (>10mm) was taken into account. 
 
 ## Mechanical
-Dimensions 41 mm* 51.69 mm. 1.6mm FR4 Board thickness. Four M3 mounting holes on the corners of the board. 
-
-## Ardupilot
-
-The Ardupilot bootloader and firmware can be flashed by using an ST-LINK and Serial Debug pins at the bottom right of the board.  
-
-See the attached [Binary Bootloader File](/Ardupilot%20Firmware/AP_Bootloader.bin) and [Binary Firmware File](/Ardupilot%20Firmware/AP_Bootloader.bin).  
-See the attached hardware definition files [hwdef.dat](/Ardupilot%20Firmware/hwdef.dat) and [hwdef-bl.dat](/Ardupilot%20Firmware/hwdef-bl.dat) that can be built using the [Ardupilot Repository](https://github.com/Ardupilot/ardupilot).
-
-## Ardupilot Build
-```bash
-cd ardupilot/
-./waf clean
-./waf configure --board MyCustomFC
-./waf copter
-```
+Dimensions 41 mm* 51.69 mm. 1.6mm FR4 Board thickness. Four M3 mounting holes on the corners of the board.
 
 ## License
 [Flight-Controller V1.0](https://github.com/jeffrey500/Flight-Controller) © 2026 by [Jeffrey Zhu](https://jzhu.ca) is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 [![CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
-
-//ADD BOM, Picture of the Board at the top
