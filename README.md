@@ -1,4 +1,4 @@
-# Flight-Controller V1.1
+# Flight-Controller V1.2
 
 The purpose of this project was to gain experience working on a 4-layer PCB layout with Altium and working with the ARM STM32 family of microcontrollers.  
 Communication protocols such as SPI, UART, I2C, CAN, and USB were explored.  
@@ -12,14 +12,12 @@ This board is a part of my interest to building the entire hardware and software
 
 <img src="media/Board_front.png" width="49%" alt="CUBEMX"> <img src="media/Board_back.png" width="44.7%" alt="CUBEMX">
 
-## Improvements from V1.0
-1. Inductor with higher saturation and max current chosen for Buck Converter
-2. Swapped TPS7A2033PDBVR for the TPS74533PQWDRVRQ which has higher max current supply
-3. Buzzer moved from PE8 to PA4 (Pin with PWM timer)
-4. SD-Card correctly realigned
-5. Both 5.1k CC resistors for USB-C attached to ground
-6. Removed DFU LED
-
+## Improvements from V1.1
+1. Complete routing optimization to decrease trace lengths
+2. Reduction of parallel traces to reduce crosstalk
+3. Reduction of PCB footprint
+4. Modified silkscreen for LEDs
+5. Added directionality silkscreen indicator for accelerometer
 
 ## Features
 
@@ -92,7 +90,7 @@ Routing Priority: USB, SDMMC, SPI, DAC, CAN, UART, I2C, PWM, GPIO.
 Impedance matching was not done for SDMMC due to a lower speed requirement but length matching (>10mm) was taken into account. 
 
 ## Mechanical
-Dimensions 41 mm* 55.9 mm. 1.6mm Board thickness. Four M3 mounting holes on the corners of the board. 
+Dimensions 41 mm* 51.69 mm. 1.6mm FR4 Board thickness. Four M3 mounting holes on the corners of the board. 
 
 ## Ardupilot
 
@@ -108,11 +106,6 @@ cd ardupilot/
 ./waf configure --board MyCustomFC
 ./waf copter
 ```
-
-## Next Iteration
-
-- Less long-parallel wiring which could resulted in the coupling of signals
-  - Better initial planning of component layout
 
 ## License
 [Flight-Controller V1.0](https://github.com/jeffrey500/Flight-Controller) © 2026 by [Jeffrey Zhu](https://jzhu.ca) is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
