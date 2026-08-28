@@ -230,6 +230,35 @@ SECTIONS
   PROVIDE( __bss_start = __tbss_start );
   PROVIDE( __bss_size = __bss_end - __bss_start );
 
+  /* DMA-reachable RAM.
+     DMA1/DMA2 sit on the AHB matrix and have NO path to DTCM (0x20000000) or
+     ITCM, so every buffer a DMA stream touches must be placed here. A buffer
+     left in the default .data/.bss (which map to DTCMRAM above) fails silently:
+     HAL_*_Start_DMA() still returns HAL_OK and the stream raises TEIF on its
+     first beat, so the buffer simply never changes.
+       .ram_d1 -> AXI SRAM   0x24000000 (D1)  512K
+       .ram_d2 -> SRAM1/2/3  0x30000000 (D2)  288K - local to DMA1/DMA2, prefer this
+     Neither is cleared or copied by the startup code, so initialise explicitly. */
+  .ram_d1 (NOLOAD) :
+  {
+    . = ALIGN(32);
+    _sram_d1 = .;
+    *(.ram_d1)
+    *(.ram_d1*)
+    . = ALIGN(32);
+    _eram_d1 = .;
+  } >RAM
+
+  .ram_d2 (NOLOAD) :
+  {
+    . = ALIGN(32);
+    _sram_d2 = .;
+    *(.ram_d2)
+    *(.ram_d2*)
+    . = ALIGN(32);
+    _eram_d2 = .;
+  } >RAM_D2
+
   /* User_heap_stack section, used to check that there is enough RAM left */
   ._user_heap_stack (NOLOAD) :
   {

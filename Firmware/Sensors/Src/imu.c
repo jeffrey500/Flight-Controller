@@ -23,6 +23,7 @@ extern SPI_HandleTypeDef hspi1;
 #define REG_INIT_CTRL     0x59
 #define REG_INIT_DATA     0x5E
 #define REG_INTERNAL_STAT 0x21
+#define REG_RESET 0x7E
 
 // Scaling (For ±2000 dps and ±8g)
 #define ACCEL_SCALE (1.0f / 4096.0f)
@@ -53,16 +54,12 @@ static void IMU_WriteReg(uint8_t reg, uint8_t value) {
 }
 
 static bool IMU_WriteFirmware(void){
-    uint8_t txAddress = REG_INIT_DATA & 0x7F;
 
     // Prepare BMI270 for firmware
     IMU_WriteReg(REG_INIT_CTRL, 0x00);
     HAL_Delay(1);
 
     HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);
-
-    // Send dest register
-    HAL_SPI_Transmit(IMU_SPI, &txAddress, 1, HAL_MAX_DELAY);
     
     // Send bmi270 firmware
     HAL_SPI_Transmit(IMU_SPI, bmi270_config_file, sizeof(bmi270_config_file)/sizeof(uint8_t), HAL_MAX_DELAY);
@@ -71,7 +68,7 @@ static bool IMU_WriteFirmware(void){
 
     // MBI270 firmware complete
     IMU_WriteReg(REG_INIT_CTRL, 0x01);
-    HAL_Delay(30);
+    HAL_Delay(50);
 
     // Verify firmware
     uint8_t status = IMU_ReadReg(REG_INTERNAL_STAT);
@@ -81,10 +78,26 @@ static bool IMU_WriteFirmware(void){
     return true;
 }
 
+// Switch from I2C to SPI
+void IMU_Switch_SPI(void){
+    HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_RESET);
+    HAL_Delay(1);
+    HAL_GPIO_WritePin(CS_PORT, CS_PIN, GPIO_PIN_SET);
+    HAL_Delay(10);
+}
+
 // Initalize IMU
 bool IMU_Init(void){
     // Delay initalization for 100ms such that IMU has time to boot up HAL_Delay ok becuase ouside of main loop
     HAL_Delay(100);
+
+    IMU_Switch_SPI();
+
+    // Reset Chip
+    IMU_WriteReg(REG_RESET, 0xB6);
+    HAL_Delay(100);
+
+    IMU_Switch_SPI();
 
     // Check Chip ID 0x24 from datasheet
     uint8_t chipID = IMU_ReadReg(REG_CHIP_ID);
@@ -92,7 +105,7 @@ bool IMU_Init(void){
 
     // Disable Power Save
     IMU_WriteReg(REG_PWR_CONF, 0x00);
-    HAL_Delay(10);
+    HAL_Delay(20);
 
     if (IMU_WriteFirmware() == false) return false;
 

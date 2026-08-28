@@ -9,6 +9,7 @@ typedef struct {
     uint16_t pitch;
     uint16_t yaw;
     uint16_t throttle;
+    uint16_t arm;
 } RC_Channels;
 
 void Radio_ProcessByte(uint8_t data);

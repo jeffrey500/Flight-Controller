@@ -59,7 +59,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Sensors/Inc/imu.h
     Sensors/Src/imu.c
     Flight/Inc/attitude.h
-    Flight/Inc/attitude.h
+    Flight/Src/attitude.c
 )
 
 # Add include paths

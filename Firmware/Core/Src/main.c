@@ -18,11 +18,13 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "stm32h7xx_hal.h"
 #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdint.h>
+#include <string.h>
 #include <sys/types.h>
 #include "imu.h"
 #include "radio.h"
@@ -79,6 +81,7 @@ UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart6;
+DMA_HandleTypeDef hdma_usart1_rx;
 
 /* USER CODE BEGIN PV */
 
@@ -86,9 +89,18 @@ UART_HandleTypeDef huart6;
 volatile uint8_t loop_ready = 0;
 int counter = 0;
 
-// DMA buffer for Radio
-#define RADIO_BUFFER_SIZE 128
-uint8_t rx_buffer[RADIO_BUFFER_SIZE] = {0};
+// DMA buffer for Radio.
+// This MUST sit in DMA-reachable RAM. DMA1/DMA2 cannot address DTCM
+// (0x20000000), which is where .data/.bss live in STM32H743XX_FLASH.ld, so a
+// plain global here is never written by the stream. .ram_d2 maps to SRAM1 at
+// 0x30000000 - the DMA controllers' own D2 domain. See the linker script.
+// Not zero-initialised by startup; the memset in main() seeds it.
+#define RADIO_BUFFER_SIZE 512
+
+__attribute__((section(".ram_d2"), aligned(32)))
+uint8_t rx_buffer[RADIO_BUFFER_SIZE];
+
+uint16_t rx_head = 0;
 uint16_t rx_tail = 0;
 
 // Data
@@ -108,6 +120,13 @@ float angle_pid_output_pitch;
 float angular_pid_output_roll;
 float angular_pid_output_pitch;
 float angular_pid_output_yaw;
+
+volatile uint32_t dma_count = 0;
+volatile uint32_t radio_bytes = 0;
+volatile uint32_t radio_valid_frames = 0;
+volatile uint32_t radio_rc_frames = 0;
+volatile uint32_t radio_crc_errors = 0;
+volatile uint32_t radio_dma_restarts = 0;
 
 /* USER CODE END PV */
 
@@ -153,7 +172,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MPU Configuration--------------------------------------------------------*/
@@ -183,7 +201,7 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN1_Init();
   MX_I2C1_Init();
-  MX_SDMMC1_SD_Init();
+  // MX_SDMMC1_SD_Init();
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_TIM2_Init();
@@ -224,8 +242,24 @@ int main(void)
   PID_Init(&pid_pitch, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
   PID_Init(&pid_yaw, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
 
+  // Clear any stale error flags before arming DMA reception
+  __HAL_UART_CLEAR_OREFLAG(&huart1);
+  __HAL_UART_CLEAR_FEFLAG(&huart1);
+  __HAL_UART_CLEAR_NEFLAG(&huart1);
+  __HAL_UART_CLEAR_PEFLAG(&huart1);
+
+  memset(rx_buffer, 0xAA, RADIO_BUFFER_SIZE);   // known sentinel, not 0x00 or 0xFF for debugging
+  rx_head = 0;
+  rx_tail = 0;
+
   // Start Radio circular DMA
-  HAL_UART_Receive_DMA(&huart2, rx_buffer, RADIO_BUFFER_SIZE);
+  if (HAL_UART_Receive_DMA(&huart1, rx_buffer, RADIO_BUFFER_SIZE) != HAL_OK)
+  {
+    HAL_GPIO_WritePin(ERROR_GPIO_Port, ERROR_Pin, GPIO_PIN_SET);
+    while (1) {} // trap here so you know immediately if arming failed
+  }
+
+  HAL_GPIO_WritePin(HEARTBEAT_GPIO_Port, HEARTBEAT_Pin,GPIO_PIN_SET);
 
   /* USER CODE END 2 */
 
@@ -248,26 +282,40 @@ int main(void)
         HAL_GPIO_TogglePin(HEARTBEAT_GPIO_Port, HEARTBEAT_Pin);
       }
 
-      // Radio
-      // Find where the DMA is writing to currenty
-      uint16_t rx_head = RADIO_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(huart2.hdmarx);
-
-      // Process the bits where the head has moved infront of the tail
-      while (rx_tail != rx_head){
-        Radio_ProcessByte(rx_buffer[rx_tail]);
-
-        rx_tail++;
-
-        // Wrap around the circular array if the tail is past the end
-        if (rx_tail >= RADIO_BUFFER_SIZE){
-          rx_tail = 0;
-        }
+      // Pulse hearbeat at 0.5Hz
+      if (counter >= 1000){
+        counter = 0;
+        HAL_GPIO_TogglePin(HEARTBEAT_GPIO_Port, HEARTBEAT_Pin);
       }
+
+      dma_count = __HAL_DMA_GET_COUNTER(huart1.hdmarx);
+
+      rx_head = RADIO_BUFFER_SIZE - dma_count;
+
+      if (rx_head >= RADIO_BUFFER_SIZE)
+      {
+          rx_head = 0;
+      }
+
+      while (rx_tail != rx_head)
+      {
+          radio_bytes++;
+
+          Radio_ProcessByte(rx_buffer[rx_tail]);
+
+          rx_tail++;
+
+          if (rx_tail >= RADIO_BUFFER_SIZE)
+          {
+              rx_tail = 0;
+          }
+      }
+
 
       // Check if there is new complete channel data
       Radio_GetChannels(&current_channel_data);
 
-      // Add Radio failsafe here later
+      //Add Radio failsafe here later
 
       // 250 Hz loop for angle control
       if ((counter-1)%4 == 0){
@@ -288,7 +336,15 @@ int main(void)
       angular_pid_output_yaw = PID_Generate(&pid_yaw, channel_to_angular_rate(current_channel_data.yaw, 90.0f), current_imu_data.gyro_z);
 
       // Update motor outputs via mixer
-      Mixer(current_channel_data.throttle, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
+      if (current_channel_data.arm <= 700){
+        Mixer(0, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
+        HAL_GPIO_WritePin(ARM_GPIO_Port, ARM_Pin, GPIO_PIN_RESET);
+        // Turn off the arm LED
+      } else {
+        Mixer(current_channel_data.throttle, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
+        // Turn on the arm LED
+        HAL_GPIO_WritePin(ARM_GPIO_Port, ARM_Pin, GPIO_PIN_SET);
+      }
 
       // Send motor outputs via dshot
       DSHOT_Update();
@@ -1170,6 +1226,16 @@ static void MX_USART1_UART_Init(void)
   }
   /* USER CODE BEGIN USART1_Init 2 */
 
+  // Disable overrun detection on the radio port.
+  // With a circular RX DMA running, HAL_UART_IRQHandler() classifies ORE as a
+  // blocking error and permanently aborts the stream (UART_EndRxTransfer +
+  // HAL_DMA_Abort_IT). A dropped byte on a CRSF link is recoverable - the frame
+  // CRC catches it and the parser resyncs - so an overrun must not kill the link.
+  // OVRDIS is only writable while UE = 0.
+  __HAL_UART_DISABLE(&huart1);
+  SET_BIT(huart1.Instance->CR3, USART_CR3_OVRDIS);
+  __HAL_UART_ENABLE(&huart1);
+
   /* USER CODE END USART1_Init 2 */
 
 }
@@ -1340,6 +1406,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream3_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+  /* DMA1_Stream4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
 
 }
 
@@ -1419,6 +1488,32 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
   if (htim->Instance == TIM6) {
     loop_ready = 1;
   }
+}
+
+// Any UART error raised while a DMA reception is active makes the HAL tear the
+// transfer down for good - see the "any error occurs in DMA mode reception"
+// branch of HAL_UART_IRQHandler(). Framing and noise errors are routine on a
+// 420 kbaud CRSF line whenever the receiver boots, browns out or is unplugged,
+// so restart the stream instead of losing the radio permanently.
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+  if (huart->Instance != USART1) {
+    return;
+  }
+
+  radio_dma_restarts++;
+
+  __HAL_UART_CLEAR_OREFLAG(huart);
+  __HAL_UART_CLEAR_FEFLAG(huart);
+  __HAL_UART_CLEAR_NEFLAG(huart);
+  __HAL_UART_CLEAR_PEFLAG(huart);
+  huart->ErrorCode = HAL_UART_ERROR_NONE;
+
+  // The abort reset NDTR, so the read pointer has to follow it back to 0.
+  rx_head = 0;
+  rx_tail = 0;
+
+  HAL_UART_Receive_DMA(huart, rx_buffer, RADIO_BUFFER_SIZE);
 }
 
 /* USER CODE END 4 */

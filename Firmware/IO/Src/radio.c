@@ -29,8 +29,8 @@ static const uint8_t crc8tab[256] = {
 };
 
 // Current values of the stick controls
-static RC_Channels latest_channels = {992, 992, 992, 172};
-static bool new_channel_data = false;
+static RC_Channels latest_channels = {992, 992, 992, 172, 172};
+static bool new_channel_data = true;
 
 // Create the Cyclic Redundancy Check (CRC) from the packet
 uint8_t crc8(const uint8_t *ptr, uint8_t len)
@@ -86,6 +86,8 @@ void Radio_ProcessByte(uint8_t data){
                         latest_channels.pitch = (payload[3] << 5 | payload[2] >> 3) & 0x07FF;
                         latest_channels.throttle = (payload[5] << 10 | payload[4] << 2 | payload[3] >> 6) & 0x07FF;
                         latest_channels.yaw = (payload[6] << 7 | payload[5] >> 1) & 0x07FF;
+                        // byte 5 [y7,y6,y5,y4,y3,y2,y1,t11] byte 6 [a4,a3,a2,a1,y11,y10,y9,y8]
+                        latest_channels.arm = (payload[7] << 4| payload[6] >> 4) & 0x07FF;
 
                         new_channel_data = true;
                     }

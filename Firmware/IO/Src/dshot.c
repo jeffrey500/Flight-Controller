@@ -11,11 +11,15 @@ extern TIM_HandleTypeDef htim2;
 
 #define DSHOT_BUFFER_LENGTH 18
 
-// Create dshot bit value buffers for DMA to read from
-static uint32_t bufferA[DSHOT_BUFFER_LENGTH];
-static uint32_t bufferB[DSHOT_BUFFER_LENGTH];
-static uint32_t bufferC[DSHOT_BUFFER_LENGTH];
-static uint32_t bufferD[DSHOT_BUFFER_LENGTH];
+// Create dshot bit value buffers for DMA to read from.
+// These must live in .ram_d2 (SRAM1 @ 0x30000000) rather than the default
+// .bss, which the linker script places in DTCM - unreachable by DMA1/DMA2.
+#define DSHOT_DMA_RAM __attribute__((section(".ram_d2"), aligned(32)))
+
+static DSHOT_DMA_RAM uint32_t bufferA[DSHOT_BUFFER_LENGTH];
+static DSHOT_DMA_RAM uint32_t bufferB[DSHOT_BUFFER_LENGTH];
+static DSHOT_DMA_RAM uint32_t bufferC[DSHOT_BUFFER_LENGTH];
+static DSHOT_DMA_RAM uint32_t bufferD[DSHOT_BUFFER_LENGTH];
 
 // Create the 16 bit packet
 static uint16_t create_dshot_packet(uint16_t motor_value){
