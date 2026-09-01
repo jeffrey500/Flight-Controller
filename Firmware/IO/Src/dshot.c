@@ -62,7 +62,21 @@ void DSHOT_Update(void){
     packet_to_dma(dshotC, bufferC);
     packet_to_dma(dshotD, bufferD);
 
-    // Send the DMA
+    // Start each frame from a known state: stop the counter, zero it, and clear
+    // any compare/update flags left set while the timer free-ran between frames.
+    // This is what guarantees a clean re-arm - no HAL_TIM_PWM_Stop_DMA / pulse-
+    // finished callback is used, because HAL_TIM_PWM_Stop_DMA disables the whole
+    // timer and, called from the first channel's completion IRQ, would cut the
+    // other three channels' frames short and leave them stuck BUSY.
+    __HAL_TIM_DISABLE(&htim2);
+    __HAL_TIM_SET_COUNTER(&htim2, 0);
+    __HAL_TIM_CLEAR_FLAG(&htim2, TIM_FLAG_UPDATE | TIM_FLAG_CC1 | TIM_FLAG_CC2 | TIM_FLAG_CC3 | TIM_FLAG_CC4);
+
+    // Arm all four channels. Each call re-enables the timer; the streams are in
+    // DMA_NORMAL mode so they self-terminate after DSHOT_BUFFER_LENGTH transfers
+    // and TIM_DMADelayPulseCplt (installed internally by HAL) resets the channel
+    // state to READY for the next frame. Between frames the timer keeps running
+    // with all CCRx = 0, holding every output low = DShot idle.
     HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_1, bufferA, DSHOT_BUFFER_LENGTH);
     HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_2, bufferB, DSHOT_BUFFER_LENGTH);
     HAL_TIM_PWM_Start_DMA(&htim2,TIM_CHANNEL_3, bufferC, DSHOT_BUFFER_LENGTH);

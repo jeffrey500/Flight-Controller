@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "stm32h7xx_hal.h"
 #include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -90,11 +89,6 @@ volatile uint8_t loop_ready = 0;
 int counter = 0;
 
 // DMA buffer for Radio.
-// This MUST sit in DMA-reachable RAM. DMA1/DMA2 cannot address DTCM
-// (0x20000000), which is where .data/.bss live in STM32H743XX_FLASH.ld, so a
-// plain global here is never written by the stream. .ram_d2 maps to SRAM1 at
-// 0x30000000 - the DMA controllers' own D2 domain. See the linker script.
-// Not zero-initialised by startup; the memset in main() seeds it.
 #define RADIO_BUFFER_SIZE 512
 
 __attribute__((section(".ram_d2"), aligned(32)))
@@ -224,9 +218,6 @@ int main(void)
   // 1kHz loop timer
   HAL_TIM_Base_Start_IT(&htim6);
 
-  // Start Tim2 for dshot
-  HAL_TIM_Base_Start(&htim2);
-
   // Ensure IMU start proper, else ERROR light and lock
   if(IMU_Init() == false){
     HAL_GPIO_WritePin(ERROR_GPIO_Port, ERROR_Pin, GPIO_PIN_SET);
@@ -234,13 +225,13 @@ int main(void)
   }
 
   // Initalize PID for Angle Control
-  PID_Init(&angle_pid_roll, 0.004f, 0, 4.0f, 0, 0, 0, 200.0f);
-  PID_Init(&angle_pid_pitch, 0.004f, 0, 4.0f, 0, 0, 0, 200.0f);
+  PID_Init(&angle_pid_roll, 0.004f, 0, 3.0f, 0, 0, 0, 200.0f);
+  PID_Init(&angle_pid_pitch, 0.004f, 0, 3.0f, 0, 0, 0, 200.0f);
 
   // Initalize PID for Angular Rate Control
-  PID_Init(&pid_roll, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
-  PID_Init(&pid_pitch, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
-  PID_Init(&pid_yaw, 0.001f, 0.3f, 40.0f, 1.75f, 0.75f, 500.0f, 700.0f);
+  PID_Init(&pid_roll, 0.001f, 0.3f, 1.0f, 0.0f, 0.0f, 150.0f, 300.0f);
+  PID_Init(&pid_pitch, 0.001f, 0.3f, 1.0f, 0.0f, 0.0f, 150.0f, 300.0f);
+  PID_Init(&pid_yaw, 0.001f, 0.3f, 1.0f, 0.0f, 0.0f, 150.0f, 300.0f);
 
   // Clear any stale error flags before arming DMA reception
   __HAL_UART_CLEAR_OREFLAG(&huart1);
@@ -317,10 +308,11 @@ int main(void)
 
       //Add Radio failsafe here later
 
+      // Get IMU Data
+      IMU_Read(&current_imu_data);
+
       // 250 Hz loop for angle control
       if ((counter-1)%4 == 0){
-        // Get IMU Data
-        IMU_Read(&current_imu_data);
 
         // Calculate attitude data
         Update_Attitude(0.98f, 0.004, &current_imu_data, &current_attitude_data);
@@ -338,12 +330,18 @@ int main(void)
       // Update motor outputs via mixer
       if (current_channel_data.arm <= 700){
         Mixer(0, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
-        HAL_GPIO_WritePin(ARM_GPIO_Port, ARM_Pin, GPIO_PIN_RESET);
         // Turn off the arm LED
+        HAL_GPIO_WritePin(ARM_GPIO_Port, ARM_Pin, GPIO_PIN_RESET);
+
+        // Keep integrals zero while disarmed
+        pid_roll.integral = pid_pitch.integral = pid_yaw.integral = 0.0f;
+        angle_pid_roll.integral = angle_pid_pitch.integral = 0.0f;
       } else {
         Mixer(current_channel_data.throttle, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
         // Turn on the arm LED
         HAL_GPIO_WritePin(ARM_GPIO_Port, ARM_Pin, GPIO_PIN_SET);
+
+        // motor_outputs[0] = motor_outputs[1] = motor_outputs[2] = motor_outputs[3] = 300;
       }
 
       // Send motor outputs via dshot

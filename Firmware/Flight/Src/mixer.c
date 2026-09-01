@@ -36,13 +36,13 @@ void Mixer(uint16_t throttle, float roll_pid, float pitch_pid, float yaw_pid, ui
     float dshot_throttle = (float)(throttle - 172.0f) * 1.22f * (float)percent_power * 0.01f + 48.0f;
     
     // Mix the output to each motor
-    float mA = dshot_throttle - roll_pid - pitch_pid + yaw_pid;
+    float mA = dshot_throttle - roll_pid + pitch_pid + yaw_pid;
 
-    float mB = dshot_throttle - roll_pid + pitch_pid - yaw_pid;
+    float mB = dshot_throttle - roll_pid - pitch_pid - yaw_pid;
 
-    float mC = dshot_throttle + roll_pid + pitch_pid + yaw_pid;
+    float mC = dshot_throttle + roll_pid - pitch_pid + yaw_pid;
 
-    float mD = dshot_throttle + roll_pid - pitch_pid - yaw_pid;
+    float mD = dshot_throttle + roll_pid + pitch_pid - yaw_pid;
 
     // Verify and output
     motor_outputs[0] = verify_dshot(mA);
