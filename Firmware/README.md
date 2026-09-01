@@ -20,9 +20,19 @@ A finite state machine (FSM) is used to process the radio bytes and store the da
 ### Direct Memory Access
 Direct Memory Access (DMA) is used to directly store the radio packets in the circular buffer from the UART connection (RX) and to create the PWM signals required for D-shot300 to drive the motor ESCs (TX). DMA allows for the two functions to work background.
 
-## Tuning Procedure
+## Notes
+The Tim2 is used to generate D-Shot300. The flight controller should be positioned such that the +ive x-axis is facing forward and the +ive z-axis downwards. The following are the mappings for the motor to the channels:  
 
-## Build Information
+| Ch1 | Ch2 | Ch3 | Ch4 |
+|-----|-----|-----|-----|
+| A   | B   | C   | D   |
+
+<img src="https://ardupilot.org/copter/_images/m_01_01_quad_x.svg" width="40%" alt="CUBEMX">
+
+## Tuning Procedure
+Tune the angle rate controllers first
+1. Start with only a low K value (say 1.0)
+2. 
 
 ## Next Steps
 - Altitude hold using onboard barometer
@@ -32,6 +42,8 @@ Direct Memory Access (DMA) is used to directly store the radio packets in the ci
 - Integrate onboard buzzer and leds for flight state
 
 ## Helpful Documents
+https://github.com/betaflight/betaflight
+https://github.com/ArduPilot/ardupilot/tree/master/ArduCopter
 https://docs.px4.io/main/en/flight_stack/controller_diagrams  
 https://betaflight.com/docs/development/API/Dshot   
 https://github.com/tbs-fpv/tbs-crsf-spec/blob/main/crsf.md  

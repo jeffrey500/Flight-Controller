@@ -73,6 +73,8 @@ DMA_HandleTypeDef hdma_tim2_ch1;
 DMA_HandleTypeDef hdma_tim2_ch2;
 DMA_HandleTypeDef hdma_tim2_ch3;
 DMA_HandleTypeDef hdma_tim2_ch4;
+DMA_HandleTypeDef hdma_tim4_ch1;
+DMA_HandleTypeDef hdma_tim4_ch2;
 
 UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart5;
@@ -96,6 +98,8 @@ uint8_t rx_buffer[RADIO_BUFFER_SIZE];
 
 uint16_t rx_head = 0;
 uint16_t rx_tail = 0;
+
+uint16_t last_radio_transmission = 0;
 
 // Data
 RC_Channels current_channel_data;
@@ -195,7 +199,7 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN1_Init();
   MX_I2C1_Init();
-  // MX_SDMMC1_SD_Init();
+  // MX_SDMMC1_SD_Init();  // no card -> HAL_SD_Init fails -> Error_Handler() hangs boot. Re-enable once SD logging is wired up.
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_TIM2_Init();
@@ -266,6 +270,7 @@ int main(void)
 
       loop_ready = 0;
       counter++;
+      last_radio_transmission++;
 
       // Pulse hearbeat at 0.5Hz
       if (counter >= 1000){
@@ -304,7 +309,9 @@ int main(void)
 
 
       // Check if there is new complete channel data
-      Radio_GetChannels(&current_channel_data);
+      if (Radio_GetChannels(&current_channel_data)){
+        last_radio_transmission = 0;
+      }
 
       //Add Radio failsafe here later
 
@@ -328,7 +335,7 @@ int main(void)
       angular_pid_output_yaw = PID_Generate(&pid_yaw, channel_to_angular_rate(current_channel_data.yaw, 90.0f), current_imu_data.gyro_z);
 
       // Update motor outputs via mixer
-      if (current_channel_data.arm <= 700){
+      if (current_channel_data.arm <= 700 || last_radio_transmission > 200){
         Mixer(0, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
         // Turn off the arm LED
         HAL_GPIO_WritePin(ARM_GPIO_Port, ARM_Pin, GPIO_PIN_RESET);
@@ -336,12 +343,13 @@ int main(void)
         // Keep integrals zero while disarmed
         pid_roll.integral = pid_pitch.integral = pid_yaw.integral = 0.0f;
         angle_pid_roll.integral = angle_pid_pitch.integral = 0.0f;
+
+        // Prevent overflow
+        last_radio_transmission = 500;
       } else {
-        Mixer(current_channel_data.throttle, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 100);
+        Mixer(current_channel_data.throttle, angular_pid_output_roll, angular_pid_output_pitch, angular_pid_output_yaw, 50);
         // Turn on the arm LED
         HAL_GPIO_WritePin(ARM_GPIO_Port, ARM_Pin, GPIO_PIN_SET);
-
-        // motor_outputs[0] = motor_outputs[1] = motor_outputs[2] = motor_outputs[3] = 300;
       }
 
       // Send motor outputs via dshot
@@ -1006,7 +1014,7 @@ static void MX_TIM4_Init(void)
   htim4.Instance = TIM4;
   htim4.Init.Prescaler = 0;
   htim4.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim4.Init.Period = 65535;
+  htim4.Init.Period = 799;
   htim4.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim4.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_PWM_Init(&htim4) != HAL_OK)
@@ -1407,6 +1415,12 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream4_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
 
 }
 
