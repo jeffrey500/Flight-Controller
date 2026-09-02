@@ -45,6 +45,31 @@ This board is a part of my interest to building the entire hardware and software
 | Serial                    | USB-C                                 |
 | Logging                   | Micro-SD Card                         |
 
+### Timers
+The following timers are from the left of the board to the right.
+
+<table>
+  <thead>
+    <tr>
+      <!-- Adjust the colspan values so they add up to 8 total -->
+      <th colspan="4">Timer 4</th>
+      <th colspan="4">Timer 2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ch1</td>
+      <td>Ch2</td>
+      <td>Ch3</td>
+      <td>Ch4</td>
+      <td>Ch1</td>
+      <td>Ch2</td>
+      <td>Ch3</td>
+      <td>Ch4</td>
+    </tr>
+  </tbody>
+</table>
+
 ### Connectors
 The external connectors for UART, SPI, CAN, and DAC are JST-GH for secure latching connections.  
 The PWM/D-Shot uses 2.54mm pitch male header pins in 3 rows of 8 pins.  

@@ -21,11 +21,34 @@ A finite state machine (FSM) is used to process the radio bytes and store the da
 Direct Memory Access (DMA) is used to directly store the radio packets in the circular buffer from the UART connection (RX) and to create the PWM signals required for D-shot300 to drive the motor ESCs (TX). DMA allows for the two functions to work background.
 
 ## Notes
-The Tim2 is used to generate D-Shot300. The flight controller should be positioned such that the +ive x-axis is facing forward and the +ive z-axis downwards. The following are the mappings for the motor to the channels:  
+The Tim2 and Tim4 are used to generate D-Shot300. The flight controller should be positioned such that the +ive x-axis is facing forward and the +ive z-axis downwards. The following are the mappings for the motor to the channels:  
 
-| Ch1 | Ch2 | Ch3 | Ch4 |
-|-----|-----|-----|-----|
-| A   | B   | C   | D   |
+<table>
+  <thead>
+    <tr>
+      <!-- Adjust the colspan values so they add up to 8 total -->
+      <th colspan="1">Timer</th>
+      <th colspan="2">Timer 4</th>
+      <th colspan="2">Timer 2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Channel #</td>
+      <td>1</td>
+      <td>2</td>
+      <td>3</td>
+      <td>4</td>
+    </tr>
+    <tr>
+      <td>Motor</td>
+      <td>A</td>
+      <td>B</td>
+      <td>C</td>
+      <td>D</td>
+    </tr>
+  </tbody>
+</table>
 
 <img src="https://ardupilot.org/copter/_images/m_01_01_quad_x.svg" width="40%" alt="CUBEMX">
 

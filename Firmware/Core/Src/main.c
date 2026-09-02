@@ -199,7 +199,7 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN1_Init();
   MX_I2C1_Init();
-  // MX_SDMMC1_SD_Init();  // no card -> HAL_SD_Init fails -> Error_Handler() hangs boot. Re-enable once SD logging is wired up.
+  // MX_SDMMC1_SD_Init();
   MX_SPI1_Init();
   MX_SPI2_Init();
   MX_TIM2_Init();
