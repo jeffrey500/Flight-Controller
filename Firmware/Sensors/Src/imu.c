@@ -146,6 +146,6 @@ void IMU_Read(IMU_data *data){
     data->accel_z = az_raw*ACCEL_SCALE;
 
     data->gyro_x = gx_raw*GYRO_SCALE;
-    data->gyro_y = gy_raw*GYRO_SCALE;
+    data->gyro_y = -gy_raw*GYRO_SCALE;
     data->gyro_z = gz_raw*GYRO_SCALE;
 }
