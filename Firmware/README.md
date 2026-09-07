@@ -1,6 +1,4 @@
-# Work in Progress
-
-# Firmware -> Flight-Controller V1.2
+# Firmware
 This firmware was written completely from the ground up in bare-metal C and implements "angle-mode" flight stabilization of symmetric quadcopter X frame. The drone can be externally controlled using any Crossfire Serial Protocol (CRSF) radio connected via the radio JST-GH port (USART1). The drone is stabilized using data from the onboard BMI270 Intertial Measurement Unit (IMU), Radio setpoints, and 2 cascaded control loops.
 
 ## System Architecture and Control  
@@ -53,9 +51,11 @@ The Tim2 and Tim4 are used to generate D-Shot300. The flight controller should b
 <img src="https://ardupilot.org/copter/_images/m_01_01_quad_x.svg" width="40%" alt="CUBEMX">
 
 ## Tuning Procedure
-Tune the angle rate controllers first
-1. Start with only a low K value (say 1.0)
-2. 
+1. Tune the angle rate controllers
+   1. Keep D and I at zero and vary the K value until you have slight oscillations
+   2. Start with a small D value
+
+Tune the angle controllers 
 
 ## Next Steps
 - Altitude hold using onboard barometer

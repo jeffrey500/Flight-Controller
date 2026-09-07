@@ -1,4 +1,4 @@
-## Ardupilot
+## Arducopter
 
 The Ardupilot bootloader and firmware can be flashed by using an ST-LINK and Serial Debug pins at the bottom right of the board.  
 

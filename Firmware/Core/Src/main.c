@@ -233,9 +233,9 @@ int main(void)
   PID_Init(&angle_pid_pitch, 0.004f, 0, 5.0f, 0, 0, 0, 200.0f);
 
   // Initalize PID for Angular Rate Control
-  PID_Init(&pid_roll, 0.001f, 0.3f, 5.0f, 0.05f, 0.0005f, 150.0f, 300.0f);
-  PID_Init(&pid_pitch, 0.001f, 0.3f, 5.0f, 0.05f, 0.0005f, 150.0f, 300.0f);
-  PID_Init(&pid_yaw, 0.001f, 0.3f, 10.0f, 0.05f, 0.001f, 150.0f, 300.0f);
+  PID_Init(&pid_roll, 0.001f, 0.3f, 4.0f, 0.0f, 0.002f, 100.0f, 300.0f);
+  PID_Init(&pid_pitch, 0.001f, 0.3f, 4.0f, 0.0f, 0.002f, 100.0f, 300.0f);
+  PID_Init(&pid_yaw, 0.001f, 0.3f, 8.0f, 0.0f, 0.003f, 100.0f, 300.0f);
 
   // Clear any stale error flags before arming DMA reception
   __HAL_UART_CLEAR_OREFLAG(&huart1);
