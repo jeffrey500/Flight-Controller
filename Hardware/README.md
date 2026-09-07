@@ -1,6 +1,6 @@
 # PDFS Flight Controller V1.2
 
-<img src="media/Board_front.png" width="45%" alt="Board_front"> <img src="media/Board_back.png" width="46.5%" alt="Board_back">
+<img src="../Media/Board_front.png" width="45%" alt="Board_front"> <img src="../Media/Board_back.png" width="46.5%" alt="Board_back">
 
 ## Improvements from V1.1
 1. Complete re-routing of all signal traces for better signal integrity
@@ -69,10 +69,10 @@ An O3 or O4 DJI Air Unit can connect through the 6-pin JST-SH VTX connector.
 ## CubeMX
 The [STM32CubeMX Software](https://www.st.com/en/development-tools/stm32cubemx.html) was used to determine the power and pinout for the STM32H743VIT6.  
 
-<img src="Media/CUBEMX.png" width="80%" alt="CUBEMX">
+<img src="../Media/CUBEMX.png" width="80%" alt="CUBEMX">
 
 ## Schematic
-<img src="Media/Schematic.png" width="100%" alt="Schematic">
+<img src="../Media/Schematic.png" width="100%" alt="Schematic">
 
 ## Board Stackup
 Signal Ground Ground Signal (S-G-G-S) was chosen over Signal Ground Power Signal (S-G-P-S) as both signal layers are shielded from each other by a close ground plane.  
@@ -87,10 +87,10 @@ Standard copper pour is used for signal layers as well as thorough ground stitch
 | 4     | Signal  |
 
 ### Top and Bottom signal layers respectively with copper pours
-<img src="Media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer4_pour.png" width="46.5%" alt="Layer4_pour">
+<img src="../Media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer4_pour.png" width="46.5%" alt="Layer4_pour">
 
 ### Internal Ground Plane 2 and 3 respectively   
-<img src="Media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer3_pour.png" width="46.3%" alt="Layer4_pour">
+<img src="../Media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer3_pour.png" width="46.3%" alt="Layer4_pour">
 
 ## Routing
 
@@ -116,7 +116,7 @@ Dimensions 41 mm* 51.69 mm. 1.6mm FR4 Board thickness. Four M3 mounting holes on
 ## Drone
 The Drone frame was fully custonm and designed with [Steven Zhu](https://github.com/zhusteven1010-source/C.A.D-Drone-parts/upload) and was printed using PETG. The drone has a weight around 2kg.
 
-<img src="Media/Drone_assembly.png" width="50%" alt="Drone_assembly">
+<img src="../Media/Drone_assembly.png" width="50%" alt="Drone_assembly">
 
 
 ## License
