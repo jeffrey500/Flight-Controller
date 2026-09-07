@@ -1,6 +1,6 @@
 # PDFS Flight Controller V1.2
 
-<img src="../Media/Board_front.png" width="45%" alt="Board_front"> <img src="../Media/Board_back.png" width="46.5%" alt="Board_back">
+<img src="../Media/Board_front.png" width="35%" alt="Board_front"> <img src="../Media/Board_back.png" width="36.4%" alt="Board_back">
 
 ## Improvements from V1.1
 1. Complete re-routing of all signal traces for better signal integrity
@@ -87,10 +87,10 @@ Standard copper pour is used for signal layers as well as thorough ground stitch
 | 4     | Signal  |
 
 ### Top and Bottom signal layers respectively with copper pours
-<img src="../Media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer4_pour.png" width="46.5%" alt="Layer4_pour">
+<img src="../Media/Layer1_pour.png" width="46%" alt="Layer1_pour"> <img src="../Media/Layer4_pour.png" width="46.5%" alt="Layer4_pour">
 
 ### Internal Ground Plane 2 and 3 respectively   
-<img src="../Media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="Media/Layer3_pour.png" width="46.3%" alt="Layer4_pour">
+<img src="../Media/Layer2_pour.png" width="46%" alt="Layer1_pour"> <img src="../Media/Layer3_pour.png" width="46.3%" alt="Layer4_pour">
 
 ## Routing
 
