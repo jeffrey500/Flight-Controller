@@ -53,9 +53,9 @@ The Tim2 and Tim4 are used to generate D-Shot300. The flight controller should b
 ## Tuning Procedure
 1. Tune the angle rate controllers
    1. Keep D and I at zero and vary the K value until you have slight oscillations
-   2. Start with a small D value
-
-Tune the angle controllers 
+   2. Start with a small D value and increase until audible or visible vibration of the motors
+   3. Add a small I term until you remove constant error
+2. Tune the angle controllers until you are comfortable with the angle command by your remote
 
 ## Next Steps
 - Altitude hold using onboard barometer

@@ -10,7 +10,7 @@ The purpose of this project is:
 
 ### [Video of Drone Flying](https://youtu.be/c6FY-opbWkY)
 
-<img src="media/Drone.png" width="35%" alt="Board_front"> <img src="media/Three_Boards.png" width="55%" alt="Board_back">
+<img src="Media/Drone.png" width="35%" alt="Board_front"> <img src="Media/Three_Boards.png" width="55%" alt="Board_back">
 
 ### [Firmware](Firmware/README.md)  
 
@@ -20,7 +20,7 @@ The purpose of this project is:
 - Drivers for IMU and CRSF Radio
 - Use of Direct Memory Access and Finite State Machines
 
-### [Hardware](Firmware/README.md)
+### [Hardware](Hardware/README.md)
 
 - STM32H743 Microcontroller
 - 4-layer stackup + signal integrity considerations
